@@ -1,1 +1,93 @@
-raju sanasam 35 imphal 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Biodata Live Status</title>
+
+  <style>
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    .card {
+      margin-top: 60px;
+      padding: 25px;
+      border: 2px solid cyan;
+      border-radius: 15px;
+      display: inline-block;
+      box-shadow: 0 0 20px cyan;
+    }
+
+    .active { color: lime; }
+    .offline { color: red; }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Ady Sanasam</h1>
+  <p>Age: 19</p>
+  <p>Location: Imphal</p>
+  <p>Student</p>
+
+  <h2>Status: <span id="status" class="offline">Offline</span></h2>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+  // 🔥 PASTE YOUR CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "PASTE_HERE",
+    authDomain: "PASTE_HERE",
+    databaseURL: "PASTE_HERE",
+    projectId: "PASTE_HERE",
+    storageBucket: "PASTE_HERE",
+    messagingSenderId: "PASTE_HERE",
+    appId: "PASTE_HERE"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const userStatusRef = db.ref("status/user1");
+
+  // Detect connection
+  db.ref(".info/connected").on("value", function(snapshot) {
+    if (snapshot.val() === false) return;
+
+    userStatusRef.onDisconnect().set({
+      state: "offline",
+      last_changed: new Date().toString()
+    });
+
+    userStatusRef.set({
+      state: "active",
+      last_changed: new Date().toString()
+    });
+  });
+
+  // Listen for changes
+  userStatusRef.on("value", function(snapshot) {
+    const data = snapshot.val();
+    if (!data) return;
+
+    const statusEl = document.getElementById("status");
+
+    if (data.state === "active") {
+      statusEl.textContent = "Active 🟢";
+      statusEl.className = "active";
+    } else {
+      statusEl.textContent = "Offline 🔴";
+      statusEl.className = "offline";
+    }
+  });
+</script>
+
+</body>
+</html>
